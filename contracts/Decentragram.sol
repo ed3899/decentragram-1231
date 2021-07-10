@@ -6,7 +6,7 @@ contract Decentragram {
 
     // Store Images
     mapping(uint256 => Image) public images;
-    mapping(string => uint256) public test;
+    uint256 public imageCount = 0;
 
     struct Image {
         uint256 id;
@@ -16,20 +16,41 @@ contract Decentragram {
         address payable author;
     }
 
+    event ImageCreated(
+        uint256 id,
+        string imgHash,
+        string description,
+        uint256 tipAmount,
+        address payable author
+    );
+
     // Create Images
-    function uploadImage() public {
-        images[1] = Image({
-            id: 1,
-            hashImg: "abcd",
-            description: "description",
+    function uploadImage(string calldata _imgHash, string calldata _description)
+        public
+    {
+        // Increment image id
+        imageCount += 1;
+
+        // Add image to contract -> For returning purposes
+        Image memory newImage = images[imageCount];
+
+        images[imageCount] = Image({
+            id: imageCount,
+            hashImg: _imgHash,
+            description: _description,
             tipAmount: 0,
-            author: payable(address(0x0))
+            author: payable(msg.sender)
         });
+
+        // Emit event
+        emit ImageCreated(
+            newImage.id,
+            newImage.hashImg,
+            newImage.description,
+            newImage.tipAmount,
+            newImage.author
+        );
     }
 
-    function getImage(uint256 id) public view returns (Image memory) {
-        Image memory img = images[id];
-        return img;
-    }
     // Tip Images
 }

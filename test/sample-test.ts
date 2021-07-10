@@ -5,9 +5,10 @@ import DecentragramJSON from "../artifacts/contracts/Decentragram.sol/Decentragr
 import {Contract, Wallet} from "ethers";
 import {Provider} from "@ethersproject/abstract-provider";
 
-async function fixture([owner]: Wallet[], provider: Provider) {
-  const _Decentragram: Contract = await deployContract(owner, DecentragramJSON);
-  const Decentragram: Contract = await _Decentragram.deployed();
+async function fixture() {
+  const _DecentagramFac = await ethers.getContractFactory("Decentragram");
+  const _Decentagram = await _DecentagramFac.deploy();
+  const Decentragram = await _Decentagram.deployed();
   return {Decentragram};
 }
 
@@ -28,16 +29,18 @@ describe("Decentragram", function () {
   });
 });
 
-describe.only("Images", async function () {
+describe("Images", async function () {
   let result;
 
   it("Creates images", async function () {
     const {Decentragram} = await loadFixture(fixture);
-    const [owner, address2] = await ethers.getSigners();
+    const [owner, author] = await ethers.getSigners();
 
-    result = await Decentragram.uploadImage();
+    result = await Decentragram.connect(author).uploadImage(
+      "testHash",
+      "Some description"
+    );
 
     let image = await Decentragram.images(1);
-    console.log(image);
   });
 });
