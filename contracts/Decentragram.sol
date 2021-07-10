@@ -30,9 +30,7 @@ contract Decentragram {
     {
         // Increment image id
         imageCount += 1;
-
-        // Add image to contract -> For returning purposes
-        Image memory newImage = images[imageCount];
+        Image memory newImage;
 
         images[imageCount] = Image({
             id: imageCount,
@@ -41,6 +39,9 @@ contract Decentragram {
             tipAmount: 0,
             author: payable(msg.sender)
         });
+
+        // Add image to contract -> For returning purposes
+        newImage = images[imageCount];
 
         // Emit event
         emit ImageCreated(

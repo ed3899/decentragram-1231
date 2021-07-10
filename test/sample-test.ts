@@ -2,8 +2,18 @@ import {expect, assert} from "chai";
 import {ethers} from "hardhat";
 import {loadFixture, deployContract} from "ethereum-waffle";
 import DecentragramJSON from "../artifacts/contracts/Decentragram.sol/Decentragram.json";
-import {Contract, Wallet} from "ethers";
+import {
+  BigNumber,
+  Contract,
+  ContractReceipt,
+  ContractTransaction,
+  Event,
+  Transaction,
+  Wallet,
+} from "ethers";
+
 import {Provider} from "@ethersproject/abstract-provider";
+import {Result} from "ethers/lib/utils";
 
 async function fixture() {
   const _DecentagramFac = await ethers.getContractFactory("Decentragram");
@@ -29,18 +39,32 @@ describe("Decentragram", function () {
   });
 });
 
-describe("Images", async function () {
-  let result;
+describe.only("Images", async function () {
+  let result: ContractTransaction;
+  let txReceipt: ContractReceipt;
 
-  it("Creates images", async function () {
+  it.only("Creates images", async function () {
     const {Decentragram} = await loadFixture(fixture);
     const [owner, author] = await ethers.getSigners();
+    const DecentragramInterface = new Contract(
+      Decentragram.address,
+      DecentragramJSON.abi
+    );
+
+    let imageCount: BigNumber;
+    let event: Result;
 
     result = await Decentragram.connect(author).uploadImage(
       "testHash",
       "Some description"
     );
+    txReceipt = await result.wait();
 
-    let image = await Decentragram.images(1);
+    event = (txReceipt.events as unknown as Event[])[0].args as Result;
+
+    imageCount = await Decentragram.imageCount();
+    assert.strictEqual(imageCount.toNumber(), 1);
+
+    console.log(event);
   });
 });
