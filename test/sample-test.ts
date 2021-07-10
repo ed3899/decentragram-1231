@@ -6,7 +6,8 @@ import {Contract, Wallet} from "ethers";
 import {Provider} from "@ethersproject/abstract-provider";
 
 async function fixture([owner]: Wallet[], provider: Provider) {
-  const Decentragram: Contract = await deployContract(owner, DecentragramJSON);
+  const _Decentragram: Contract = await deployContract(owner, DecentragramJSON);
+  const Decentragram: Contract = await _Decentragram.deployed();
   return {Decentragram};
 }
 
@@ -24,5 +25,19 @@ describe("Decentragram", function () {
     const {Decentragram} = await loadFixture(fixture);
     const name = await Decentragram.name();
     assert.strictEqual(name, "Decentragram");
+  });
+});
+
+describe.only("Images", async function () {
+  let result;
+
+  it("Creates images", async function () {
+    const {Decentragram} = await loadFixture(fixture);
+    const [owner, address2] = await ethers.getSigners();
+
+    result = await Decentragram.uploadImage();
+
+    let image = await Decentragram.images(1);
+    console.log(image);
   });
 });
