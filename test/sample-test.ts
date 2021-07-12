@@ -46,18 +46,13 @@ describe.only("Images", async function () {
   it.only("Creates images", async function () {
     const {Decentragram} = await loadFixture(fixture);
     const [owner, author] = await ethers.getSigners();
-    const DecentragramInterface = new Contract(
-      Decentragram.address,
-      DecentragramJSON.abi
-    );
+    const hash = "testHash";
+    const description = "Some description";
 
     let imageCount: BigNumber;
     let event: Result;
 
-    result = await Decentragram.connect(author).uploadImage(
-      "testHash",
-      "Some description"
-    );
+    result = await Decentragram.connect(author).uploadImage(hash, description);
     txReceipt = await result.wait();
 
     event = (txReceipt.events as unknown as Event[])[0].args as Result;
@@ -65,6 +60,19 @@ describe.only("Images", async function () {
     imageCount = await Decentragram.imageCount();
     assert.strictEqual(imageCount.toNumber(), 1);
 
-    console.log(event);
+    assert.strictEqual(imageCount.toNumber(), 1);
+    assert.strictEqual(
+      event.id.toNumber(),
+      imageCount.toNumber(),
+      "id is correct"
+    );
+    assert.strictEqual(event.imgHash, hash, "Hash is correct");
+    assert.strictEqual(
+      event.description,
+      description,
+      "Description is correct"
+    );
+    assert.strictEqual(event.tipAmount.toNumber(), 0, "Tip amount is correct");
+    assert.strictEqual(event.author, author.address, "Author is correct");
   });
 });
