@@ -1,4 +1,4 @@
-import {expect, assert} from "chai";
+import {expect, assert, should} from "chai";
 import {ethers} from "hardhat";
 import {loadFixture, deployContract} from "ethereum-waffle";
 import DecentragramJSON from "../artifacts/contracts/Decentragram.sol/Decentragram.json";
@@ -40,11 +40,11 @@ describe("Decentragram", function () {
 });
 
 describe.only("Images", async function () {
+  const {Decentragram} = await loadFixture(fixture);
   let result: ContractTransaction;
   let txReceipt: ContractReceipt;
 
   it.only("Creates images", async function () {
-    const {Decentragram} = await loadFixture(fixture);
     const [owner, author] = await ethers.getSigners();
     const hash = "testHash";
     const description = "Some description";
@@ -74,5 +74,14 @@ describe.only("Images", async function () {
     );
     assert.strictEqual(event.tipAmount.toNumber(), 0, "Tip amount is correct");
     assert.strictEqual(event.author, author.address, "Author is correct");
+
+    //Failure when hash is empty
+    await expect(
+      Decentragram.connect(author).uploadImage("", "Image description")
+    ).to.be.revertedWith("Img hash cannot be empty");
+
+    //Failure with blank descriptions
+    await expect(Decentragram.connect(author).uploadImage("Hash", "")).to.be
+      .reverted;
   });
 });

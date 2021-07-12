@@ -28,6 +28,10 @@ contract Decentragram {
     function uploadImage(string calldata _imgHash, string calldata _description)
         public
     {
+        require(bytes(_imgHash).length > 0, "Img hash cannot be empty");
+        require(bytes(_description).length > 0, "Description cannot be empty");
+        require(msg.sender != address(0x0), "Invalid caller");
+
         // Increment image id
         imageCount += 1;
         Image memory newImage;
@@ -54,4 +58,20 @@ contract Decentragram {
     }
 
     // Tip Images
+    function tipImageOwner(uint256 _id) public payable {
+        //Fetch the image
+        Image memory _image = images[_id];
+
+        //Fetch the author
+        address payable _author = _image.author;
+
+        //Pay the author by sending them ether
+        _author.transfer(msg.value);
+
+        //Increment tip amount
+        _image.tipAmount += msg.value;
+
+        //Update the image
+        images[_id] = _image;
+    }
 }
